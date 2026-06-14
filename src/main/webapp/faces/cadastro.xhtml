@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<!--
+    View JSF: cadastro.xhtml
+    Responsabilidade: Interface de cadastro de livros utilizando JSF (Jakarta Faces).
+    Usa componentes h:form, h:inputText, h:commandButton e f:validateLength.
+    Managed Bean: LivroBean (controller/LivroBean.java) — escopo de sessão.
+    Padrão MVC: VIEW — delega toda lógica ao Managed Bean LivroBean.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:c="jakarta.tags.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cadastro JSF — Biblioteca Cesumar</title>
+    <h:outputStylesheet library="css" name="estilo.css"/>
+    <!-- Fallback: link direto caso o resource handler não resolva -->
+    <link rel="stylesheet" href="../css/estilo.css"/>
+</h:head>
+
+<h:body>
+
+    <!-- ===== CABEÇALHO ===== -->
+    <header>
+        <div class="header-inner">
+            <span class="header-logo">📚</span>
+            <div class="header-texto">
+                <h1>Biblioteca Cesumar</h1>
+                <p>Sistema de Gerenciamento do Acervo</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== NAVEGAÇÃO ===== -->
+    <nav>
+        <ul>
+            <li><a href="${pageContext.request.contextPath}/livros/listar">📋 Acervo</a></li>
+            <li><a href="${pageContext.request.contextPath}/livros/cadastro">➕ Cadastro (JSP)</a></li>
+            <li><a href="${pageContext.request.contextPath}/faces/cadastro.xhtml" class="ativo">🖊️ Cadastro JSF</a></li>
+        </ul>
+    </nav>
+
+    <main>
+
+        <!-- ===== MENSAGENS GLOBAIS JSF ===== -->
+        <h:messages globalOnly="true" styleClass="alerta alerta-sucesso"
+                    infoClass="alerta alerta-sucesso"
+                    warnClass="alerta alerta-aviso"
+                    errorClass="alerta alerta-erro"
+                    layout="list"/>
+
+        <!-- ===== FORMULÁRIO JSF DE CADASTRO ===== -->
+        <div class="card">
+            <div class="card-titulo">🖊️ Cadastro de Livro via JSF</div>
+
+            <!--
+                h:form: componente de formulário JSF.
+                id="formCadastro" — referenciado no LivroBean para os IDs das mensagens.
+            -->
+            <h:form id="formCadastro">
+
+                <div class="form-grid">
+
+                    <!-- Campo: Título -->
+                    <div class="campo campo-largo">
+                        <h:outputLabel for="titulo" value="Título"/>
+                        <span class="obrigatorio">*</span>
+                        <h:inputText id="titulo"
+                                     value="#{livroBean.titulo}"
+                                     styleClass="campo-input"
+                                     placeholder="Ex.: Clean Code"
+                                     maxlength="255"
+                                     required="true"
+                                     requiredMessage="O título é obrigatório."/>
+                        <h:message for="titulo" styleClass="msg-erro-campo"/>
+                    </div>
+
+                    <!-- Campo: Autor -->
+                    <div class="campo campo-largo">
+                        <h:outputLabel for="autor" value="Autor"/>
+                        <span class="obrigatorio">*</span>
+                        <h:inputText id="autor"
+                                     value="#{livroBean.autor}"
+                                     styleClass="campo-input"
+                                     placeholder="Ex.: Robert C. Martin"
+                                     maxlength="255"
+                                     required="true"
+                                     requiredMessage="O autor é obrigatório."/>
+                        <h:message for="autor" styleClass="msg-erro-campo"/>
+                    </div>
+
+                    <!-- Campo: Ano de Publicação -->
+                    <div class="campo">
+                        <h:outputLabel for="ano" value="Ano de Publicação"/>
+                        <span class="obrigatorio">*</span>
+                        <h:inputText id="ano"
+                                     value="#{livroBean.anoPublicacao}"
+                                     styleClass="campo-input"
+                                     placeholder="Ex.: 2008"
+                                     required="true"
+                                     requiredMessage="O ano é obrigatório.">
+                            <f:convertNumber integerOnly="true"
+                                             minFractionDigits="0"
+                                             groupingUsed="false"/>
+                        </h:inputText>
+                        <h:message for="ano" styleClass="msg-erro-campo"/>
+                        <span class="dica">Entre 1000 e o ano atual.</span>
+                    </div>
+
+                    <!-- Campo: ISBN -->
+                    <div class="campo">
+                        <h:outputLabel for="isbn" value="ISBN"/>
+                        <span class="obrigatorio">*</span>
+                        <h:inputText id="isbn"
+                                     value="#{livroBean.isbn}"
+                                     styleClass="campo-input"
+                                     placeholder="Ex.: 9780132350884"
+                                     maxlength="17"
+                                     required="true"
+                                     requiredMessage="O ISBN é obrigatório."/>
+                        <h:message for="isbn" styleClass="msg-erro-campo"/>
+                        <span class="dica">ISBN-10 ou ISBN-13 (somente dígitos).</span>
+                    </div>
+
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="form-acoes">
+                    <!--
+                        h:commandButton: botão JSF que aciona o método cadastrar()
+                        no LivroBean. O atributo action retorna a navegação JSF.
+                    -->
+                    <h:commandButton value="💾 Cadastrar Livro"
+                                     action="#{livroBean.cadastrar()}"
+                                     styleClass="btn btn-primario"/>
+
+                    <!--
+                        h:button: botão de navegação JSF (não submete o formulário).
+                        Redireciona para a listagem.
+                    -->
+                    <h:button value="← Voltar ao Acervo"
+                              outcome="/livros/listar"
+                              styleClass="btn btn-secundario"/>
+                </div>
+
+            </h:form>
+        </div>
+
+        <!-- ===== LISTAGEM INLINE (JSF DataTable) ===== -->
+        <div class="card">
+            <div class="card-titulo">📋 Livros no Acervo (#{livroBean.total} registros)</div>
+
+            <!--
+                h:dataTable: componente JSF para renderizar tabelas dinamicamente.
+                Itera sobre a lista retornada por livroBean.getLivros().
+            -->
+            <h:dataTable value="#{livroBean.livros}"
+                         var="livro"
+                         styleClass="tabela-wrapper"
+                         rendered="#{livroBean.total gt 0}">
+
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="#"/>
+                    </f:facet>
+                    <h:outputText value="#{livro.id}"/>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Título"/>
+                    </f:facet>
+                    <strong><h:outputText value="#{livro.titulo}"/></strong>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Autor"/>
+                    </f:facet>
+                    <h:outputText value="#{livro.autor}"/>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Ano"/>
+                    </f:facet>
+                    <h:outputText value="#{livro.anoPublicacao}"/>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="ISBN"/>
+                    </f:facet>
+                    <span class="isbn-badge">
+                        <h:outputText value="#{livro.isbn}"/>
+                    </span>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">
+                        <h:outputText value="Ação"/>
+                    </f:facet>
+                    <!--
+                        Formulário de exclusão inline na tabela JSF.
+                        Chama livroBean.excluir(id) ao clicar no botão.
+                    -->
+                    <h:form>
+                        <h:commandButton value="🗑️ Excluir"
+                                         styleClass="btn btn-perigo"
+                                         action="#{livroBean.excluir(livro.id)}"
+                                         onclick="return confirm('Remover o livro &quot;#{livro.titulo}&quot;?')"/>
+                    </h:form>
+                </h:column>
+
+            </h:dataTable>
+
+            <!-- Mensagem quando não há livros -->
+            <h:panelGroup rendered="#{livroBean.total eq 0}">
+                <div class="sem-livros">
+                    <span class="icone">📭</span>
+                    Nenhum livro cadastrado ainda. Use o formulário acima!
+                </div>
+            </h:panelGroup>
+
+        </div>
+
+    </main>
+
+    <footer>
+        <p><strong>Biblioteca Cesumar</strong> — Sistema de Gerenciamento do Acervo &#169; 2025</p>
+    </footer>
+
+</h:body>
+</html>

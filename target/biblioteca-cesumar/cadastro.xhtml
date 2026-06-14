@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cadastro JSF — Biblioteca Cesumar</title>
+    <!-- CSS via link direto, sem resource handler do JSF -->
+    <link rel="stylesheet" type="text/css" href="css/estilo.css"/>
+</h:head>
+
+<h:body>
+
+    <header>
+        <div class="header-inner">
+            <span class="header-logo">📚</span>
+            <div class="header-texto">
+                <h1>Biblioteca Cesumar</h1>
+                <p>Sistema de Gerenciamento do Acervo</p>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="livros/listar">📋 Acervo</a></li>
+            <li><a href="livros/cadastro">➕ Cadastro (JSP)</a></li>
+            <li><a href="cadastro.xhtml" class="ativo">🖊️ Cadastro JSF</a></li>
+        </ul>
+    </nav>
+
+    <main>
+
+        <!-- Mensagens globais JSF -->
+        <h:messages globalOnly="true"
+                    infoClass="alerta alerta-sucesso"
+                    errorClass="alerta alerta-erro"
+                    warnClass="alerta alerta-aviso"
+                    layout="list"/>
+
+        <!-- Formulário de cadastro -->
+        <div class="card">
+            <div class="card-titulo">🖊️ Cadastro de Livro via JSF</div>
+
+            <h:form id="formCadastro">
+                <div class="form-grid">
+
+                    <div class="campo campo-largo">
+                        <h:outputLabel for="titulo" value="Título"/>
+                        <span class="obrigatorio">*</span>
+                        <h:inputText id="titulo"
+                                     value="#{livroBean.titulo}"
+                                     placeholder="Ex.: Clean Code"
+                                     maxlength="255"
+                                     required="true"
+                                     requiredMessage="O título é obrigatório."/>
+                        <h:message for="titulo" styleClass="msg-erro-campo"/>
+                    </div>
+
+                    <div class="campo campo-largo">
+                        <h:outputLabel for="autor" value="Autor"/>
+                        <span class="obrigatorio">*</span>
+                        <h:inputText id="autor"
+                                     value="#{livroBean.autor}"
+                                     placeholder="Ex.: Robert C. Martin"
+                                     maxlength="255"
+                                     required="true"
+                                     requiredMessage="O autor é obrigatório."/>
+                        <h:message for="autor" styleClass="msg-erro-campo"/>
+                    </div>
+
+                    <div class="campo">
+                        <h:outputLabel for="ano" value="Ano de Publicação"/>
+                        <span class="obrigatorio">*</span>
+                        <h:inputText id="ano"
+                                     value="#{livroBean.anoPublicacao}"
+                                     placeholder="Ex.: 2008"
+                                     required="true"
+                                     requiredMessage="O ano é obrigatório.">
+                            <f:convertNumber integerOnly="true" groupingUsed="false"/>
+                        </h:inputText>
+                        <h:message for="ano" styleClass="msg-erro-campo"/>
+                        <span class="dica">Entre 1000 e o ano atual.</span>
+                    </div>
+
+                    <div class="campo">
+                        <h:outputLabel for="isbn" value="ISBN"/>
+                        <span class="obrigatorio">*</span>
+                        <h:inputText id="isbn"
+                                     value="#{livroBean.isbn}"
+                                     placeholder="Ex.: 9780132350884"
+                                     maxlength="17"
+                                     required="true"
+                                     requiredMessage="O ISBN é obrigatório."/>
+                        <h:message for="isbn" styleClass="msg-erro-campo"/>
+                        <span class="dica">ISBN-10 ou ISBN-13 (somente dígitos).</span>
+                    </div>
+
+                </div>
+
+                <div class="form-acoes">
+                    <h:commandButton value="💾 Cadastrar Livro"
+                                     action="#{livroBean.cadastrar()}"
+                                     styleClass="btn btn-primario"/>
+                    <a href="livros/listar" class="btn btn-secundario">← Voltar ao Acervo</a>
+                </div>
+
+            </h:form>
+        </div>
+
+        <!-- Tabela de livros -->
+        <div class="card">
+            <div class="card-titulo">📋 Livros no Acervo (#{livroBean.total} registros)</div>
+
+            <h:dataTable value="#{livroBean.livros}" var="livro"
+                         rendered="#{livroBean.total gt 0}"
+                         styleClass="tabela-wrapper">
+                <h:column>
+                    <f:facet name="header"><h:outputText value="#"/></f:facet>
+                    <h:outputText value="#{livro.id}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header"><h:outputText value="Título"/></f:facet>
+                    <strong><h:outputText value="#{livro.titulo}"/></strong>
+                </h:column>
+                <h:column>
+                    <f:facet name="header"><h:outputText value="Autor"/></f:facet>
+                    <h:outputText value="#{livro.autor}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header"><h:outputText value="Ano"/></f:facet>
+                    <h:outputText value="#{livro.anoPublicacao}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header"><h:outputText value="ISBN"/></f:facet>
+                    <span class="isbn-badge"><h:outputText value="#{livro.isbn}"/></span>
+                </h:column>
+                <h:column>
+                    <f:facet name="header"><h:outputText value="Ação"/></f:facet>
+                    <h:form>
+                        <h:commandButton value="🗑️ Excluir"
+                                         styleClass="btn btn-perigo"
+                                         action="#{livroBean.excluir(livro.id)}"
+                                         onclick="return confirm('Remover este livro?')"/>
+                    </h:form>
+                </h:column>
+            </h:dataTable>
+
+            <h:panelGroup rendered="#{livroBean.total eq 0}">
+                <div class="sem-livros">
+                    <span class="icone">📭</span>
+                    Nenhum livro cadastrado ainda.
+                </div>
+            </h:panelGroup>
+        </div>
+
+    </main>
+
+    <footer>
+        <p><strong>Biblioteca Cesumar</strong> — Sistema de Gerenciamento do Acervo &#169; 2025</p>
+    </footer>
+
+</h:body>
+</html>

@@ -1,0 +1,4 @@
+controller\LivroServlet.class
+model\Livro.class
+repository\LivroRepository.class
+controller\LivroBean.class
