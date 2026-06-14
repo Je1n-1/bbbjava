@@ -8,11 +8,65 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Cadastro JSF — Biblioteca Cesumar</title>
-    <!-- CSS via link direto, sem resource handler do JSF -->
-    <link rel="stylesheet" type="text/css" href="css/estilo.css"/>
 </h:head>
 
 <h:body>
+
+    <!-- CSS inline para evitar problema de carregamento de recurso externo -->
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --cor-primaria: #1A3A5C; --cor-secundaria: #2E6DA4; --cor-accent: #E8A020;
+            --cor-perigo: #C0392B; --cor-sucesso: #1E7E34; --cor-aviso: #856404;
+            --cor-fundo: #F4F6F9; --cor-card: #FFFFFF; --cor-borda: #D1D9E0;
+            --cor-texto: #1C2833; --cor-texto-leve: #6C757D;
+            --sombra: 0 2px 12px rgba(26,58,92,0.10); --raio: 8px;
+        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--cor-fundo); color: var(--cor-texto); line-height: 1.6; min-height: 100vh; }
+        header { background: linear-gradient(135deg, var(--cor-primaria) 0%, var(--cor-secundaria) 100%); color: #fff; box-shadow: 0 3px 10px rgba(0,0,0,0.15); }
+        .header-inner { max-width: 1100px; margin: 0 auto; padding: 18px 24px; display: flex; align-items: center; gap: 16px; }
+        .header-logo { font-size: 2rem; }
+        .header-texto h1 { font-size: 1.4rem; font-weight: 700; }
+        .header-texto p { font-size: 0.82rem; opacity: 0.80; margin-top: 2px; }
+        nav { background: var(--cor-primaria); border-top: 1px solid rgba(255,255,255,0.1); }
+        nav ul { list-style: none; display: flex; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+        nav ul li a { display: block; color: rgba(255,255,255,0.85); text-decoration: none; padding: 12px 20px; font-size: 0.9rem; font-weight: 500; border-bottom: 3px solid transparent; transition: background 0.2s; }
+        nav ul li a:hover, nav ul li a.ativo { background: rgba(255,255,255,0.08); color: #fff; border-bottom-color: var(--cor-accent); }
+        main { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
+        .card { background: var(--cor-card); border-radius: var(--raio); box-shadow: var(--sombra); padding: 28px 32px; margin-bottom: 24px; }
+        .card-titulo { font-size: 1.15rem; font-weight: 700; color: var(--cor-primaria); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--cor-fundo); display: flex; align-items: center; gap: 8px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .campo-largo { grid-column: 1 / -1; }
+        .campo { display: flex; flex-direction: column; gap: 5px; }
+        .campo label { font-size: 0.85rem; font-weight: 600; color: var(--cor-primaria); }
+        .obrigatorio { color: var(--cor-perigo); margin-left: 2px; }
+        .campo input { padding: 10px 14px; border: 1.5px solid var(--cor-borda); border-radius: 6px; font-size: 0.92rem; color: var(--cor-texto); background: #fff; outline: none; transition: border-color 0.2s, box-shadow 0.2s; width: 100%; }
+        .campo input:focus { border-color: var(--cor-secundaria); box-shadow: 0 0 0 3px rgba(46,109,164,0.15); }
+        .dica { font-size: 0.76rem; color: var(--cor-texto-leve); }
+        .msg-erro-campo { font-size: 0.78rem; color: var(--cor-perigo); font-weight: 500; }
+        .form-acoes { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .btn { padding: 10px 22px; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+        .btn-primario { background: var(--cor-secundaria); color: #fff; }
+        .btn-primario:hover { background: var(--cor-primaria); }
+        .btn-perigo { background: var(--cor-perigo); color: #fff; padding: 6px 14px; font-size: 0.82rem; }
+        .btn-perigo:hover { opacity: 0.85; }
+        .btn-secundario { background: var(--cor-fundo); color: var(--cor-texto); border: 1.5px solid var(--cor-borda); }
+        .btn-secundario:hover { background: var(--cor-borda); }
+        .alerta { padding: 12px 18px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .alerta-sucesso { background: #EAFAF1; color: var(--cor-sucesso); border-left: 4px solid var(--cor-sucesso); }
+        .alerta-erro { background: #FDEDEC; color: var(--cor-perigo); border-left: 4px solid var(--cor-perigo); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        thead tr { background: var(--cor-primaria); color: #fff; }
+        thead th { padding: 12px 16px; text-align: left; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        tbody tr { border-bottom: 1px solid var(--cor-fundo); transition: background 0.15s; }
+        tbody tr:hover { background: #F0F5FB; }
+        tbody td { padding: 12px 16px; vertical-align: middle; }
+        .isbn-badge { font-family: 'Courier New', monospace; font-size: 0.82rem; background: var(--cor-fundo); padding: 3px 8px; border-radius: 4px; color: var(--cor-texto-leve); }
+        .sem-livros { text-align: center; padding: 40px 20px; color: var(--cor-texto-leve); }
+        .sem-livros .icone { font-size: 3rem; display: block; margin-bottom: 8px; }
+        footer { background: var(--cor-primaria); color: rgba(255,255,255,0.65); text-align: center; padding: 20px; font-size: 0.82rem; margin-top: 48px; }
+        footer strong { color: rgba(255,255,255,0.9); }
+    </style>
 
     <header>
         <div class="header-inner">
@@ -26,22 +80,20 @@
 
     <nav>
         <ul>
-            <li><a href="livros/listar">📋 Acervo</a></li>
-            <li><a href="livros/cadastro">➕ Cadastro (JSP)</a></li>
-            <li><a href="cadastro.xhtml" class="ativo">🖊️ Cadastro JSF</a></li>
+            <li><a href="#{request.contextPath}/livros/listar">📋 Acervo</a></li>
+            <li><a href="#{request.contextPath}/livros/cadastro">➕ Cadastro (JSP)</a></li>
+            <li><a href="#{request.contextPath}/cadastro.xhtml" class="ativo">🖊️ Cadastro JSF</a></li>
         </ul>
     </nav>
 
     <main>
 
-        <!-- Mensagens globais JSF -->
         <h:messages globalOnly="true"
                     infoClass="alerta alerta-sucesso"
                     errorClass="alerta alerta-erro"
                     warnClass="alerta alerta-aviso"
                     layout="list"/>
 
-        <!-- Formulário de cadastro -->
         <div class="card">
             <div class="card-titulo">🖊️ Cadastro de Livro via JSF</div>
 
@@ -51,35 +103,27 @@
                     <div class="campo campo-largo">
                         <h:outputLabel for="titulo" value="Título"/>
                         <span class="obrigatorio">*</span>
-                        <h:inputText id="titulo"
-                                     value="#{livroBean.titulo}"
-                                     placeholder="Ex.: Clean Code"
-                                     maxlength="255"
-                                     required="true"
-                                     requiredMessage="O título é obrigatório."/>
+                        <h:inputText id="titulo" value="#{livroBean.titulo}"
+                                     placeholder="Ex.: Clean Code" maxlength="255"
+                                     required="true" requiredMessage="O título é obrigatório."/>
                         <h:message for="titulo" styleClass="msg-erro-campo"/>
                     </div>
 
                     <div class="campo campo-largo">
                         <h:outputLabel for="autor" value="Autor"/>
                         <span class="obrigatorio">*</span>
-                        <h:inputText id="autor"
-                                     value="#{livroBean.autor}"
-                                     placeholder="Ex.: Robert C. Martin"
-                                     maxlength="255"
-                                     required="true"
-                                     requiredMessage="O autor é obrigatório."/>
+                        <h:inputText id="autor" value="#{livroBean.autor}"
+                                     placeholder="Ex.: Robert C. Martin" maxlength="255"
+                                     required="true" requiredMessage="O autor é obrigatório."/>
                         <h:message for="autor" styleClass="msg-erro-campo"/>
                     </div>
 
                     <div class="campo">
                         <h:outputLabel for="ano" value="Ano de Publicação"/>
                         <span class="obrigatorio">*</span>
-                        <h:inputText id="ano"
-                                     value="#{livroBean.anoPublicacao}"
+                        <h:inputText id="ano" value="#{livroBean.anoPublicacao}"
                                      placeholder="Ex.: 2008"
-                                     required="true"
-                                     requiredMessage="O ano é obrigatório.">
+                                     required="true" requiredMessage="O ano é obrigatório.">
                             <f:convertNumber integerOnly="true" groupingUsed="false"/>
                         </h:inputText>
                         <h:message for="ano" styleClass="msg-erro-campo"/>
@@ -89,12 +133,9 @@
                     <div class="campo">
                         <h:outputLabel for="isbn" value="ISBN"/>
                         <span class="obrigatorio">*</span>
-                        <h:inputText id="isbn"
-                                     value="#{livroBean.isbn}"
-                                     placeholder="Ex.: 9780132350884"
-                                     maxlength="17"
-                                     required="true"
-                                     requiredMessage="O ISBN é obrigatório."/>
+                        <h:inputText id="isbn" value="#{livroBean.isbn}"
+                                     placeholder="Ex.: 9780132350884" maxlength="17"
+                                     required="true" requiredMessage="O ISBN é obrigatório."/>
                         <h:message for="isbn" styleClass="msg-erro-campo"/>
                         <span class="dica">ISBN-10 ou ISBN-13 (somente dígitos).</span>
                     </div>
@@ -105,19 +146,16 @@
                     <h:commandButton value="💾 Cadastrar Livro"
                                      action="#{livroBean.cadastrar()}"
                                      styleClass="btn btn-primario"/>
-                    <a href="livros/listar" class="btn btn-secundario">← Voltar ao Acervo</a>
+                    <a href="#{request.contextPath}/livros/listar" class="btn btn-secundario">← Voltar ao Acervo</a>
                 </div>
-
             </h:form>
         </div>
 
-        <!-- Tabela de livros -->
         <div class="card">
             <div class="card-titulo">📋 Livros no Acervo (#{livroBean.total} registros)</div>
 
             <h:dataTable value="#{livroBean.livros}" var="livro"
-                         rendered="#{livroBean.total gt 0}"
-                         styleClass="tabela-wrapper">
+                         rendered="#{livroBean.total gt 0}">
                 <h:column>
                     <f:facet name="header"><h:outputText value="#"/></f:facet>
                     <h:outputText value="#{livro.id}"/>
